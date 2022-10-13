@@ -1,0 +1,3 @@
+day	start	end	temp	enable
+1	6	-1	37	TRUE
+0	6	-1	37	FALSE
