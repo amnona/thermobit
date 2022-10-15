@@ -42,6 +42,32 @@ def test():
     return 'pita'
 
 
+@app.route('/get_temp')
+def get_temp():
+    '''Get the current and set temperature'''
+    global app_state
+    return jsonify({'current_temp': app_state.current_temp, 'set_temp':app_state.set_temp})
+
+@app.route('/set_temp')
+def set_temp(set_temp=None):
+    '''Update the set temperature. If we want to turn off, supply set_temp as 6
+    
+    Parameters:
+    ----------
+    set_temp: int
+        the new temperature to set (6 to turn off)
+    '''
+    global app_state
+    set_temp = int(request.args.get('set_temp', -1))
+    current_temp = app_state.current_temp
+    # check if need to turn on the heater
+    if set_temp >= 0:
+        print('setting temp to %d' % set_temp)
+        app_state.set_temp = set_temp
+        app_state.set_temp_time = datetime.datetime.now()
+        return 'temp_set:%d' % set_temp
+
+
 @app.route('/main')
 def main_page(set_temp=None):
     global app_state
