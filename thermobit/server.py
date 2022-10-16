@@ -4,7 +4,6 @@ import random
 from collections import OrderedDict
 
 import json
-from crypt import methods
 from flask import Flask, request, jsonify, render_template, redirect
 
 import plotly
