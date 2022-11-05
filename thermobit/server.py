@@ -26,7 +26,7 @@ app_state = AppState()
 
 
 def debug(msg):
-    print('%s: %s' % (datetime.datetime.strftime(datetime.datetime.now()), msg))
+    print('%s: %s' % (datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), msg))
 
 def create_temp_graph():
     dat = pd.read_csv('./temp_log.txt',sep='\t')
