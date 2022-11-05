@@ -50,7 +50,7 @@ def get_temp():
     '''Get the current and set temperature'''
     global app_state
     res = jsonify({'current_temp': app_state.current_temp, 'set_temp':app_state.set_temp})
-    deubg('get_temp returned %s' % res)
+    debug('get_temp returned %s' % res)
     return res
 
 @app.route('/set_temp')
