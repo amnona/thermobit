@@ -24,6 +24,10 @@ class AppState:
 
 app_state = AppState()
 
+
+def debug(msg):
+    print('%s: %s' % (datetime.datetime.strftime(datetime.datetime.now()), msg))
+
 def create_temp_graph():
     dat = pd.read_csv('./temp_log.txt',sep='\t')
     dat['y'] = dat['temp']
@@ -45,7 +49,9 @@ def test():
 def get_temp():
     '''Get the current and set temperature'''
     global app_state
-    return jsonify({'current_temp': app_state.current_temp, 'set_temp':app_state.set_temp})
+    res = jsonify({'current_temp': app_state.current_temp, 'set_temp':app_state.set_temp})
+    deubg('get_temp returned %s' % res)
+    return res
 
 @app.route('/set_temp')
 def set_temp(set_temp=None):
@@ -59,9 +65,10 @@ def set_temp(set_temp=None):
     global app_state
     set_temp = int(request.args.get('set_temp', -1))
     current_temp = app_state.current_temp
+    debug('set_temp: current:%d , set:%d' % (current_temp, set_temp))
     # check if need to turn on the heater
     if set_temp >= 0:
-        print('setting temp to %d' % set_temp)
+        debug('setting temp to %d' % set_temp)
         app_state.set_temp = set_temp
         app_state.set_temp_time = datetime.datetime.now()
         return 'temp_set:%d' % set_temp
@@ -72,9 +79,11 @@ def main_page(set_temp=None):
     global app_state
     set_temp = int(request.args.get('set_temp', -1))
     current_temp = app_state.current_temp
+    debug('main: current:%d , set:%d' % (current_temp, set_temp))
+
     # check if need to turn on the heater
     if set_temp >= 0:
-        print('setting temp to %d' % set_temp)
+        debug('setting temp to %d' % set_temp)
         app_state.set_temp = set_temp
         app_state.set_temp_time = datetime.datetime.now()
         return redirect('/main')
@@ -215,20 +224,22 @@ def updated():
     heater['CurrentTemp'] = 49
 
     # check if we need to keep the heater on:
-    print(app_state.current_temp)
+    debug('updated(): current_temp: %d' % app_state.current_temp)
     if app_state.current_temp < app_state.set_temp:
+        debug('temp still lower')
         # check if are not heating for over 1 hour
         if app_state.set_temp_time < datetime.datetime.now()+datetime.timedelta(hours=1):
+            debug('need to heat, heater temp set to %d '% app_state.set_temp)
             heater['SetTemp'] = app_state.set_temp
         else:
             # TODO: need to send an email notification
-            print('Heater for over 1 hour and still did not reach the set temperature')
+            debug('Heater for over 1 hour and still did not reach the set temperature')
             app_state.set_temp = 7
             heater['SetTemp'] = app_state.set_temp
     else:
         # we reached the set temperature, so stop heating
         # maybe send a message that the temperature has been reached (alexa? email?)
-        print('Temperature %d reached' % app_state.set_temp)
+        debug('Temperature %d reached (current temp is %d)' % (app_state.set_temp, app_state.current_temp))
         app_state.set_temp = 6
         heater['SetTemp'] = app_state.set_temp
 
@@ -254,7 +265,7 @@ def updated():
 
     res = {'heater': heater, 'checkSum': checkSum}
     # res = {'heater': heater}
-    print(res)
+    # debug(res)
     return jsonify(res)
 
 @app.route('/api/token', methods=['post'])
