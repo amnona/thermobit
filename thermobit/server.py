@@ -294,29 +294,64 @@ def updated():
     heater['IsOn'] = False
     heater['CurrentTemp'] = 49
 
+    state['start_hour'] = 19
+    state['start_min'] = 10
+
+    now = datetime.datetime.now()
+    # check if we need to turn on the boiler based on the daily timers
+    if state.get('new_day', False):
+        debug('new day')
+        start_hour = state.get('start_hour',None)
+        start_min = state.get('start_min', None)
+        if start_hour is not None and start_min is not None:
+            daynum = now.strftime('%w')
+            day = chr(ord(daynum)+1)
+            if datetime.time(start_hour,start_min) < datetime.time(now.hour, now.minute):
+                debug('turning heater on because timer has begun')
+                state['set_temp'] = state.get('timer_temp', -1)
+                state['set_temp_time'] = now
+                state['new_day'] = False
+                state['last_day'] = now.day
+                write_state(state)
+            else:
+                debug('timer has not started yet')
+
+    # check if a new day has begun - for the daily timers
+    last_day = state.get('last_day',-1)
+    current_day = now.day
+    if last_day != current_day:
+        state['last_day'] = current_day
+        state['new_day'] = True
+        write_state(state)
+
     # check if we need to keep the heater on:
     current_temp = state.get('current_temp', -1)
     set_temp = state.get('set_temp', -1)
     set_temp_time = state.get('set_temp_time', None)
     debug('updated(): current_temp: %d' % current_temp)
+
     if current_temp < set_temp:
         debug('temp still lower')
         # check if are not heating for over 1 hour
-        if set_temp_time < datetime.datetime.now()+datetime.timedelta(hours=1):
+        if set_temp_time + datetime.timedelta(hours=1) < datetime.datetime.now():
             debug('need to heat, heater temp set to %d '% set_temp)
             heater['SetTemp'] = set_temp
         else:
             # TODO: need to send an email notification
             debug('Heater for over 1 hour and still did not reach the set temperature')
-            state['set_temp'] = 7
+            state['set_temp'] = 6
             write_state(state)
             heater['SetTemp'] = set_temp
     else:
-        # we reached the set temperature, so stop heating
-        # maybe send a message that the temperature has been reached (alexa? email?)
-        debug('Temperature %d reached (current temp is %d)' % (set_temp, current_temp))
-        state['set_temp'] = 6
-        write_state(state)
+        # set_temp 6 means the heater should be off
+        if set_temp != 6:
+            # we reached the set temperature, so stop heating
+            # maybe send a message that the temperature has been reached (alexa? email?)
+            debug('Temperature %d reached (current temp is %d)' % (set_temp, current_temp))
+            state['set_temp'] = 6
+            write_state(state)
+        else:
+            debug('heater off')
         heater['SetTemp'] = set_temp
 
     now = datetime.datetime.now()
