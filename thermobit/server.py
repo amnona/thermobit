@@ -200,6 +200,12 @@ def calc_hash(heater, hash=181):
     hash = hash%256
     return hash
 
+@app.route('/controller/create/', methods=['POST','GET'])
+def controller_create():
+    data = request.get_json()
+    print(data)
+    return
+
 
 @app.route('/home/espcreate/', methods=['POST','GET'])
 def espcreate():
