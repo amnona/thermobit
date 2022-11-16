@@ -204,7 +204,7 @@ def calc_hash(heater, hash=181):
 def controller_create():
     data = request.get_json()
     print(data)
-    return
+    return ''
 
 
 @app.route('/home/espcreate/', methods=['POST','GET'])
