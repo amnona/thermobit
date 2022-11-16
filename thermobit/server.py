@@ -206,7 +206,23 @@ def controller_create():
     debug('************************')
     debug(data)
     debug('************************')
-    return ''
+
+    heater = OrderedDict()
+    heater['Id'] = 0
+    heater['IsOn'] = False
+    heater['CurrentTemp'] = 49
+    heater['SetTemp'] = 10
+    heater['Now'] = '7,20:00'
+    heater['UserNumber'] = 25564181
+    heater['ProgramNumber'] = 3
+    heater['Mode'] = 'PRG'
+    heater['Prg'] = '19:00,10'
+
+    checkSum = "{:02x}".format(calc_hash(heater)).upper()
+
+    res = {'heater': heater, 'checkSum': checkSum}
+    # res = {'heater': heater}
+    return jsonify(res)
 
 
 @app.route('/home/espcreate/', methods=['POST','GET'])
