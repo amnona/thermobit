@@ -222,6 +222,9 @@ def programs_add():
 
     res = {'heater': heater, 'checkSum': checkSum}
     # res = {'heater': heater}
+
+    return 'Thermobit'
+
     return jsonify(res)
 
 
@@ -247,6 +250,9 @@ def controller_create():
 
     res = {'heater': heater, 'checkSum': checkSum}
     # res = {'heater': heater}
+    
+    return 'Thermobit'
+
     return jsonify(res)
 
 
