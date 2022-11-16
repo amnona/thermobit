@@ -1,5 +1,4 @@
 #!/bin/bash
-
 source activate thermobit
 echo "running thermobit"
 cd /home/pi/git/thermobit/thermobit
