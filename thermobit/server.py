@@ -201,7 +201,7 @@ def calc_hash(heater, hash=181):
     return hash
 
 @app.route('/programs/add/', methods=['POST','GET'])
-def controller_create():
+def programs_add():
     data = request.get_json()
     debug('********programs/add/****************')
     debug(data)
