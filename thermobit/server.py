@@ -391,15 +391,15 @@ def updated():
     heater['Prg'] = '19:00,45'
 
 
-    # heater['Id'] = 0
-    # heater['IsOn'] = False
-    # heater['CurrentTemp'] = 49
-    # heater['SetTemp'] = 10
-    # heater['Now'] = '7,20:00'
-    # heater['UserNumber'] = 25564181
-    # heater['ProgramNumber'] = 3
-    # heater['Mode'] = 'PRG'
-    # heater['Prg'] = '19:00,10'
+    heater['Id'] = 0
+    heater['IsOn'] = False
+    heater['CurrentTemp'] = 49
+    heater['SetTemp'] = 10
+    heater['Now'] = '7,20:00'
+    heater['UserNumber'] = 25564181
+    heater['ProgramNumber'] = 3
+    heater['Mode'] = 'PRG'
+    heater['Prg'] = '19:00,10'
     # checkSum = 'E4'
     # checkSum = hex(random.randint(0,255))[2:]
     # if len(checkSum) == 1:
