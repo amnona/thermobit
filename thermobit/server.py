@@ -200,12 +200,37 @@ def calc_hash(heater, hash=181):
     hash = hash%256
     return hash
 
+@app.route('/programs/add/', methods=['POST','GET'])
+def controller_create():
+    data = request.get_json()
+    debug('********programs/add/****************')
+    debug(data)
+    debug('********/programs/add/****************')
+
+    heater = OrderedDict()
+    heater['Id'] = 0
+    heater['IsOn'] = False
+    heater['CurrentTemp'] = 49
+    heater['SetTemp'] = 10
+    heater['Now'] = '7,20:00'
+    heater['UserNumber'] = 25564181
+    heater['ProgramNumber'] = 3
+    heater['Mode'] = 'PRG'
+    heater['Prg'] = '19:00,10'
+
+    checkSum = "{:02x}".format(calc_hash(heater)).upper()
+
+    res = {'heater': heater, 'checkSum': checkSum}
+    # res = {'heater': heater}
+    return jsonify(res)
+
+
 @app.route('/controller/create/', methods=['POST','GET'])
 def controller_create():
     data = request.get_json()
-    debug('************************')
+    debug('********/controller/create/****************')
     debug(data)
-    debug('************************')
+    debug('******/controller/create/******************')
 
     heater = OrderedDict()
     heater['Id'] = 0
