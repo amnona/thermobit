@@ -203,7 +203,9 @@ def calc_hash(heater, hash=181):
 @app.route('/controller/create/', methods=['POST','GET'])
 def controller_create():
     data = request.get_json()
-    print(data)
+    debug('************************')
+    debug(data)
+    debug('************************')
     return ''
 
 
