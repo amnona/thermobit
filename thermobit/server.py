@@ -78,13 +78,26 @@ def get_state():
         data = json.loads(res[0])
         debug(data)
     debug('got cursor')
-    return data
+    # convert to datetimes
+    cdata = data.copy()
+    for ck,cv in data.items():
+        if isinstance(cv, float):
+            if cv<0:
+                cdata[ck] = datetime.datetime.fromtimestamp(-cv)
+    debug('read state %s' % cdata)
+    return cdata
 
 
 def write_state(state):
     con = get_db()
     cur = con.cursor()
-    cur.execute('UPDATE thermobit SET state=? WHERE idx=1', [json.dumps(state)])
+    cstate = state.copy()
+    # need to convert the datetimes so can serialize (we do it as negative floats since epoch)
+    for ck,cv in state.items():
+        if isinstance(cv, datetime.datetime):
+            cstate[ck] = -cv.timestamp()
+    debug('writing state %s' % cstate)
+    cur.execute('UPDATE thermobit SET state=? WHERE idx=1', [json.dumps(cstate)])
     con.commit()
     debug('updated state')
 
@@ -112,6 +125,7 @@ def test():
 @app.route('/get_temp')
 def get_temp():
     '''Get the current and set temperature'''
+    debug('get_temp')
     state = get_state()
     res = jsonify({'current_temp': state.get('current_temp'), 'set_temp':state.get('set_temp')})
     debug('get_temp returned %s' % res)
@@ -127,6 +141,7 @@ def set_temp(set_temp=None):
     set_temp: int
         the new temperature to set (6 to turn off)
     '''
+    debug('set_temp to %s' % set_temp)
     state = get_state()
     set_temp = int(request.args.get('set_temp', -1))
     current_temp = state.get('current_temp', -1)
@@ -169,7 +184,11 @@ def calc_hash(heater, hash=181):
     '''
     for ck, cv in heater.items():
         if ck == 'SetTemp':
-            cv = str(cv)
+            debug('%s' % type(cv))
+            # cv = str(cv)
+            cv = str(int(cv))
+        if isinstance(cv, float):
+            debug('BATATA %s %s' % (ck, cv))
         if isinstance(cv, int):
             for x in cv.to_bytes(4,'big'):
                 hash = hash+x
@@ -197,7 +216,7 @@ def espcreate():
     '''
     global current_temp
 
-    print('espcreate')
+    debug('espcreate')
     data = request.get_json()
     debug(data)
     state = get_state()
@@ -207,7 +226,7 @@ def espcreate():
         now = datetime.datetime.now()
         date_str = now.strftime('%Y\t%m\t%d\t%H\t%M')
         f.write(date_str + '\t' + str(ctemp) + '\n')
-    write_state()
+    write_state(state)
     return ''
 
 
@@ -286,13 +305,17 @@ def updated():
             [Path: /checkSum]
 
     '''
+    debug('updated')
     state = get_state()
     user_number = request.args.get('UserNumber', None)
-    heater = {}
+    debug(user_number)
+
+    # need to setup in the correct order
     heater = OrderedDict()
     heater['Id'] = 0
     heater['IsOn'] = False
     heater['CurrentTemp'] = 49
+    heater['SetTemp'] = 49
 
     state['start_hour'] = 19
     state['start_min'] = 10
@@ -333,13 +356,14 @@ def updated():
     if current_temp < set_temp:
         debug('temp still lower')
         # check if are not heating for over 1 hour
-        if set_temp_time + datetime.timedelta(hours=1) < datetime.datetime.now():
+        if set_temp_time + datetime.timedelta(hours=1) >= datetime.datetime.now():
             debug('need to heat, heater temp set to %d '% set_temp)
             heater['SetTemp'] = set_temp
         else:
             # TODO: need to send an email notification
             debug('Heater for over 1 hour and still did not reach the set temperature')
-            state['set_temp'] = 6
+            set_temp = 6
+            state['set_temp'] = set_temp
             write_state(state)
             heater['SetTemp'] = set_temp
     else:
@@ -348,7 +372,8 @@ def updated():
             # we reached the set temperature, so stop heating
             # maybe send a message that the temperature has been reached (alexa? email?)
             debug('Temperature %d reached (current temp is %d)' % (set_temp, current_temp))
-            state['set_temp'] = 6
+            set_temp = 6
+            state['set_temp'] = set_temp
             write_state(state)
         else:
             debug('heater off')
@@ -365,16 +390,27 @@ def updated():
     heater['Mode'] = 'MAN'
     heater['Prg'] = '19:00,45'
 
+
+    # heater['Id'] = 0
+    # heater['IsOn'] = False
+    # heater['CurrentTemp'] = 49
+    # heater['SetTemp'] = 10
+    # heater['Now'] = '7,20:00'
+    # heater['UserNumber'] = 25564181
+    # heater['ProgramNumber'] = 3
+    # heater['Mode'] = 'PRG'
+    # heater['Prg'] = '19:00,10'
     # checkSum = 'E4'
     # checkSum = hex(random.randint(0,255))[2:]
     # if len(checkSum) == 1:
     #     checkSum = '0'+checkSum
     # checkSum = checkSum.upper()
+
     checkSum = "{:02x}".format(calc_hash(heater)).upper()
 
     res = {'heater': heater, 'checkSum': checkSum}
     # res = {'heater': heater}
-    # debug(res)
+    debug(res)
     return jsonify(res)
 
 @app.route('/api/token', methods=['post'])
