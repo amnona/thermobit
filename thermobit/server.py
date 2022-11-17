@@ -8,6 +8,7 @@ import inspect
 import sys
 from flask import Flask, request, jsonify, render_template, redirect, g
 import sqlite3
+import random
 
 import plotly
 import plotly.express as px
@@ -230,10 +231,11 @@ def programs_add():
 
 @app.route('/controller/create/', methods=['POST','GET'])
 def controller_create():
-    data = request.get_json()
+    # data = request.get_json()
     debug('********/controller/create/****************')
-    debug(data)
+    # debug(data)
     debug('******/controller/create/******************')
+    return 'Thermobit'
 
     heater = OrderedDict()
     heater['Id'] = 0
@@ -251,8 +253,6 @@ def controller_create():
     res = {'heater': heater, 'checkSum': checkSum}
     # res = {'heater': heater}
     
-    return 'Thermobit'
-
     return jsonify(res)
 
 
@@ -367,7 +367,7 @@ def updated():
 
     # need to setup in the correct order
     heater = OrderedDict()
-    heater['Id'] = 0
+    heater['Id'] = random.randint(-1, 5)
     heater['IsOn'] = False
     heater['CurrentTemp'] = 49
     heater['SetTemp'] = 49
@@ -446,16 +446,18 @@ def updated():
     heater['Prg'] = '19:00,45'
 
 
-    heater['Id'] = 0
-    heater['IsOn'] = False
-    heater['CurrentTemp'] = 49
-    heater['SetTemp'] = 10
-    heater['Now'] = '7,20:00'
-    heater['UserNumber'] = 25564181
-    heater['ProgramNumber'] = 3
-    heater['Mode'] = 'PRG'
-    heater['Prg'] = '19:00,10'
+    # heater['Id'] = 0
+    # heater['IsOn'] = False
+    # heater['CurrentTemp'] = 49
+    # heater['SetTemp'] = 10
+    # heater['Now'] = '7,20:00'
+    # heater['UserNumber'] = 25564181
+    # heater['ProgramNumber'] = 3
+    # heater['Mode'] = 'PRG'
+    # heater['Prg'] = '19:00,10'
+
     # checkSum = 'E4'
+
     # checkSum = hex(random.randint(0,255))[2:]
     # if len(checkSum) == 1:
     #     checkSum = '0'+checkSum
