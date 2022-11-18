@@ -367,7 +367,7 @@ def updated():
 
     # need to setup in the correct order
     heater = OrderedDict()
-    heater['Id'] = random.randint(-1, 5)
+    heater['Id'] = 0
     heater['IsOn'] = False
     heater['CurrentTemp'] = 49
     heater['SetTemp'] = 49
